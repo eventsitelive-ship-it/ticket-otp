@@ -9,5 +9,6 @@ const firebaseConfig = {
   measurementId: "G-8HX1M1X3KS"
 };
 
-// Initialize Firebase (for non-module HTML setup)
+// Initialize Firebase (for classic non-module setup)
 firebase.initializeApp(firebaseConfig);
+
