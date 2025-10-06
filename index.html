@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>OTP Registration</title>
 
-  <!-- Firebase SDKs (version 10.13.0 — namespaced, required for firebase.auth()) -->
+  <!-- Firebase SDKs (version 10.13.0 — namespaced) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
 
@@ -63,46 +63,55 @@
   <p id="message"></p>
 
   <script>
-    // Initialize Firebase Auth
-    const auth = firebase.auth();
-    let confirmationResult;
-
-    document.getElementById('sendBtn').onclick = async () => {
-      const phone = document.getElementById('phone').value.trim();
-      const name = document.getElementById('name').value.trim();
-      if (!phone || !name) {
-        document.getElementById('message').innerText = 'Enter name & phone';
+    // Wait until page and Firebase are fully loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      // Check Firebase loaded correctly
+      if (typeof firebase === "undefined") {
+        document.getElementById('message').innerText = "Firebase not loaded. Please refresh.";
         return;
       }
 
-      // Setup invisible reCAPTCHA
-      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-      });
+      const auth = firebase.auth();
+      let confirmationResult;
 
-      try {
-        confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
-        document.getElementById('otpSection').style.display = 'block';
-        document.getElementById('message').innerText = 'OTP sent (use test number if testing)';
-      } catch (err) {
-        document.getElementById('message').innerText = 'Error: ' + err.message;
-      }
-    };
+      document.getElementById('sendBtn').onclick = async () => {
+        const phone = document.getElementById('phone').value.trim();
+        const name = document.getElementById('name').value.trim();
 
-    document.getElementById('verifyBtn').onclick = async () => {
-      const otp = document.getElementById('otp').value.trim();
-      const name = document.getElementById('name').value.trim();
-      if (!otp) return alert('Enter OTP');
+        if (!phone || !name) {
+          document.getElementById('message').innerText = 'Enter name & phone';
+          return;
+        }
 
-      try {
-        const result = await confirmationResult.confirm(otp);
-        const user = result.user;
-        document.getElementById('message').innerText =
-          `Welcome ${name}! Verified: ${user.phoneNumber}`;
-      } catch (err) {
-        document.getElementById('message').innerText = 'Invalid OTP: ' + err.message;
-      }
-    };
+        // Setup invisible reCAPTCHA
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+          size: 'invisible',
+        });
+
+        try {
+          confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
+          document.getElementById('otpSection').style.display = 'block';
+          document.getElementById('message').innerText = 'OTP sent (use test number if testing)';
+        } catch (err) {
+          document.getElementById('message').innerText = 'Error: ' + err.message;
+        }
+      };
+
+      document.getElementById('verifyBtn').onclick = async () => {
+        const otp = document.getElementById('otp').value.trim();
+        const name = document.getElementById('name').value.trim();
+        if (!otp) return alert('Enter OTP');
+
+        try {
+          const result = await confirmationResult.confirm(otp);
+          const user = result.user;
+          document.getElementById('message').innerText =
+            `Welcome ${name}! Verified: ${user.phoneNumber}`;
+        } catch (err) {
+          document.getElementById('message').innerText = 'Invalid OTP: ' + err.message;
+        }
+      };
+    });
   </script>
 </body>
 </html>
