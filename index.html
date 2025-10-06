@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <title>OTP Registration</title>
 
-  <!-- Firebase SDKs (version 10.13.0 — namespaced) -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
+  <!-- ✅ Use Firebase COMPAT versions (for classic firebase.auth() support) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
 
   <!-- Your Firebase configuration -->
   <script src="firebase-config.js"></script>
@@ -18,6 +18,9 @@
       margin: 40px auto;
       padding: 20px;
       text-align: center;
+      background: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     input {
       width: 100%;
@@ -25,6 +28,7 @@
       margin: 6px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
+      font-size: 14px;
     }
     button {
       padding: 10px 16px;
@@ -33,13 +37,18 @@
       color: white;
       border-radius: 6px;
       cursor: pointer;
+      font-size: 15px;
     }
     button:hover {
       background: #0056b3;
     }
     #message {
-      margin-top: 10px;
+      margin-top: 15px;
       color: #333;
+      font-weight: bold;
+    }
+    #otpSection {
+      margin-top: 15px;
     }
   </style>
 </head>
@@ -63,9 +72,8 @@
   <p id="message"></p>
 
   <script>
-    // Wait until page and Firebase are fully loaded
     document.addEventListener("DOMContentLoaded", () => {
-      // Check Firebase loaded correctly
+      // Ensure Firebase loaded
       if (typeof firebase === "undefined") {
         document.getElementById('message').innerText = "Firebase not loaded. Please refresh.";
         return;
@@ -91,9 +99,9 @@
         try {
           confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
           document.getElementById('otpSection').style.display = 'block';
-          document.getElementById('message').innerText = 'OTP sent (use test number if testing)';
+          document.getElementById('message').innerText = '✅ OTP sent (use test number if testing)';
         } catch (err) {
-          document.getElementById('message').innerText = 'Error: ' + err.message;
+          document.getElementById('message').innerText = '❌ Error: ' + err.message;
         }
       };
 
@@ -106,9 +114,9 @@
           const result = await confirmationResult.confirm(otp);
           const user = result.user;
           document.getElementById('message').innerText =
-            `Welcome ${name}! Verified: ${user.phoneNumber}`;
+            `🎉 Welcome ${name}! Verified: ${user.phoneNumber}`;
         } catch (err) {
-          document.getElementById('message').innerText = 'Invalid OTP: ' + err.message;
+          document.getElementById('message').innerText = '❌ Invalid OTP: ' + err.message;
         }
       };
     });
