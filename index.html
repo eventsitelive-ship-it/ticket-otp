@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>OTP Registration</title>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs (version 10.13.0 — namespaced, required for firebase.auth()) -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
 
@@ -12,58 +12,95 @@
   <script src="firebase-config.js"></script>
 
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;max-width:420px;margin:40px auto;padding:20px;}
-    input{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:6px;}
-    button{padding:10px 16px;border:none;background:#007bff;color:white;border-radius:6px;cursor:pointer;}
-    button:hover{background:#0056b3;}
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      max-width: 420px;
+      margin: 40px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #message {
+      margin-top: 10px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
   <h2>Register with Mobile OTP</h2>
 
   <label>Name:</label>
-  <input id="name" placeholder="Your name">
+  <input id="name" placeholder="Your name" />
 
   <label>Phone Number (+91XXXXXXXXXX):</label>
-  <input id="phone" placeholder="+91XXXXXXXXXX">
+  <input id="phone" placeholder="+91XXXXXXXXXX" />
 
   <div id="recaptcha-container"></div>
   <button id="sendBtn">Send OTP</button>
 
   <div id="otpSection" style="display:none;">
-    <input id="otp" placeholder="Enter OTP">
+    <input id="otp" placeholder="Enter OTP" />
     <button id="verifyBtn">Verify OTP</button>
   </div>
 
   <p id="message"></p>
 
   <script>
+    // Initialize Firebase Auth
     const auth = firebase.auth();
     let confirmationResult;
 
     document.getElementById('sendBtn').onclick = async () => {
       const phone = document.getElementById('phone').value.trim();
       const name = document.getElementById('name').value.trim();
-      if (!phone || !name) { document.getElementById('message').innerText='Enter name & phone'; return; }
+      if (!phone || !name) {
+        document.getElementById('message').innerText = 'Enter name & phone';
+        return;
+      }
 
-      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{size:'invisible'});
-      try{
+      // Setup invisible reCAPTCHA
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+      });
+
+      try {
         confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
-        document.getElementById('otpSection').style.display='block';
-        document.getElementById('message').innerText='OTP sent (use test number if testing)';
-      }catch(err){ document.getElementById('message').innerText='Error: '+err.message; }
+        document.getElementById('otpSection').style.display = 'block';
+        document.getElementById('message').innerText = 'OTP sent (use test number if testing)';
+      } catch (err) {
+        document.getElementById('message').innerText = 'Error: ' + err.message;
+      }
     };
 
     document.getElementById('verifyBtn').onclick = async () => {
       const otp = document.getElementById('otp').value.trim();
       const name = document.getElementById('name').value.trim();
-      if(!otp) return alert('Enter OTP');
-      try{
+      if (!otp) return alert('Enter OTP');
+
+      try {
         const result = await confirmationResult.confirm(otp);
         const user = result.user;
-        document.getElementById('message').innerText = `Welcome ${name}! Verified: ${user.phoneNumber}`;
-      }catch(err){
-        document.getElementById('message').innerText='Invalid OTP: '+err.message;
+        document.getElementById('message').innerText =
+          `Welcome ${name}! Verified: ${user.phoneNumber}`;
+      } catch (err) {
+        document.getElementById('message').innerText = 'Invalid OTP: ' + err.message;
       }
     };
   </script>
